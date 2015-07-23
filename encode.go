@@ -32,6 +32,7 @@ func encode_ext(value reflect.Value, channel chan []byte, threshold uint16) {
 	var tail, tail_first *tailElement
 	var tt *typesTree = &typesTree{}
 	var nullflags []byte
+	var mdf bool = false // multidimensional array flag
 	var index func(int) reflect.Value
 
 	tail = &tailElement{}
@@ -66,6 +67,10 @@ func encode_ext(value reflect.Value, channel chan []byte, threshold uint16) {
 
 			stack = stack.parent
 			tt = tt.parent.next
+
+			if stack == nil {
+				mdf = false
+			}
 
 			continue
 		}
@@ -136,10 +141,13 @@ func encode_ext(value reflect.Value, channel chan []byte, threshold uint16) {
 					// the i'th element is the last one in array
 					stack = &stackElement{stack, i + 1, n, value, index, nullflags}
 
-					nullflags = encodeNullFlags(field)
+					nullflags = encodeNullFlags(field, mdf)
 					if nullflags != nil {
 						ta = type_arrayn
 					}
+
+					// set up multidimensional array flag
+					mdf = true
 
 					i = uint64(0)
 					n = uint64(field.Len())
@@ -243,7 +251,7 @@ func encode_ext(value reflect.Value, channel chan []byte, threshold uint16) {
 						tt.n = n
 					} else {
 						// field types of struct seems to be already encoded
-						nullflags = encodeNullFlags(field)
+						nullflags = encodeNullFlags(field, false)
 					}
 					tt = tt.child
 				}
@@ -711,10 +719,10 @@ func pack_number(value interface{}, n uint8) []byte {
 // a[0] == nil set the first bit: 0b10000000
 // a[7] == nil set the  last one: 0b00000001
 // so, byteflag = 0b10000001
-func encodeNullFlags(v reflect.Value) []byte {
+func encodeNullFlags(v reflect.Value, force bool) []byte {
 	var method func(int) reflect.Value
 	var nelements func() int
-	var hasnil bool
+	var hasnil bool = force
 
 	switch v.Kind() {
 	case reflect.Struct:
