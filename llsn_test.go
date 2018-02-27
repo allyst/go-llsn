@@ -19,12 +19,12 @@
 package llsn_test
 
 import (
-	llsn "github.com/allyst/go-llsn"
 	"bytes"
+	"errors"
 	"fmt"
+	llsn "github.com/allyst/go-llsn"
 	"math/rand"
 	"os"
-	"errors"
 	"testing"
 	"time"
 )
@@ -93,7 +93,7 @@ func TestLLSN_1M_random_signed_NUMBER(t *testing.T) {
 		rv1 := llsn.DecodeNumber(b)
 
 		if rv != rv1 {
-			t.Fatal("\t# %d == %d  FAILED\n", rv, rv1)
+			t.Fatalf("\t# %d == %d  FAILED\n", rv, rv1)
 		}
 
 	}
@@ -110,7 +110,7 @@ func TestLLSN_1M_random_unsigned_NUMBER(t *testing.T) {
 		rv1 := llsn.DecodeUNumber(b)
 
 		if rv != rv1 {
-			t.Fatal("\t# %d == %d  FAILED\n", rv, rv1)
+			t.Fatalf("\t# %d == %d  FAILED\n", rv, rv1)
 		}
 
 	}
@@ -123,7 +123,7 @@ func TestLLSN_unsigned_NUMBER(t *testing.T) {
 		b := llsn.EncodeUNumber(uint64(v))
 		v1 := llsn.DecodeUNumber(b)
 		if v != v1 {
-			t.Fatal("%d != %d ", v, v1)
+			t.Fatalf("%d != %d ", v, v1)
 		}
 	}
 
@@ -135,7 +135,7 @@ func TestLLSN_signed_NUMBER(t *testing.T) {
 		b := llsn.EncodeNumber(int64(sv))
 		sv1 := llsn.DecodeNumber(b)
 		if sv != sv1 {
-			t.Fatal("%d != %d ", sv, sv1)
+			t.Fatalf("%d != %d ", sv, sv1)
 		}
 	}
 
@@ -150,8 +150,8 @@ func TestLLSN_1M_random_DATE(t *testing.T) {
 		d1 := llsn.DecodeDate(bd)
 
 		if !d.Equal(*d1) {
-			t.Fatal("\nERROR... date source: %s\n", d)
-			t.Fatal("           date dest: %s\n", d1)
+			t.Fatalf("\nERROR... date source: %s\n", d)
+			t.Fatalf("           date dest: %s\n", d1)
 		} else {
 			// fmt.Printf("\n#OK      date source: %s\n", d)
 			// fmt.Printf("#          date dest: %s\n", d1)
@@ -187,7 +187,7 @@ func TestLLSN_encodeComplexStruct(t *testing.T) {
 
 	if bytes.Compare(b.Bytes(), exampleMainValueEncoded) != 0 {
 		fmt.Printf("%d\n", b.Bytes())
-		t.Fatal("encoded result is incorrect")
+		t.Fatalf("encoded result is incorrect")
 	}
 
 	fmt.Printf("TestLLSN_encodeComplexStruct: PASSED\n")
@@ -212,7 +212,7 @@ func TestLLSN_encodeComplexStruct_via_channel(t *testing.T) {
 		if encoded {
 			l := len(bin)
 			if bytes.Compare(tail[:l], bin) != 0 {
-				t.Fatal("encoded result is incorrect")
+				t.Fatalf("encoded result is incorrect")
 				break
 			}
 
