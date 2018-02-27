@@ -180,13 +180,16 @@ func decode_ext(buffer *decodeBuffer, value *reflect.Value) {
 			num := decodeNumber(buffer)
 
 			if field.Kind() == reflect.Ptr {
-				field.Set(reflect.ValueOf((*int64)(&num)))
+				ifield := reflect.New(field.Type().Elem())
+				ifield.Elem().SetInt(num)
+				field.Set(ifield)
 			} else {
 				field.SetInt(num)
 			}
 
 		case type_number_null:
-			field.Set(reflect.ValueOf((*int64)(nil)))
+			ifield := reflect.NewAt(field.Type().Elem(), nil)
+			field.Set(ifield)
 			value_type = type_number
 
 		// UNUMBER
@@ -194,13 +197,16 @@ func decode_ext(buffer *decodeBuffer, value *reflect.Value) {
 			num := decodeUNumber(buffer)
 
 			if field.Kind() == reflect.Ptr {
-				field.Set(reflect.ValueOf((*uint64)(&num)))
+				ifield := reflect.New(field.Type().Elem())
+				ifield.Elem().SetUint(num)
+				field.Set(ifield)
 			} else {
 				field.SetUint(num)
 			}
 
 		case type_unumber_null:
-			field.Set(reflect.ValueOf((*uint64)(nil)))
+			ifield := reflect.NewAt(field.Type().Elem(), nil)
+			field.Set(ifield)
 			value_type = type_unumber
 
 		// FLOAT
@@ -208,12 +214,15 @@ func decode_ext(buffer *decodeBuffer, value *reflect.Value) {
 			f := decodeFloat(buffer)
 
 			if field.Kind() == reflect.Ptr {
+				ifield := reflect.New(field.Type().Elem())
+				ifield.Elem().SetFloat(f)
 				field.Set(reflect.ValueOf((*float64)(&f)))
 			} else {
 				field.SetFloat(f)
 			}
 		case type_float_null:
-			field.Set(reflect.ValueOf((*float64)(nil)))
+			ifield := reflect.NewAt(field.Type().Elem(), nil)
+			field.Set(ifield)
 			value_type = type_float
 
 		// BOOL
@@ -231,7 +240,8 @@ func decode_ext(buffer *decodeBuffer, value *reflect.Value) {
 			}
 
 		case type_bool_null:
-			field.Set(reflect.ValueOf((*bool)(nil)))
+			ifield := reflect.NewAt(field.Type().Elem(), nil)
+			field.Set(ifield)
 			value_type = type_bool
 
 		// STRING
