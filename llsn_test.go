@@ -84,7 +84,7 @@ type ExampleMain struct {
 	Field16 *llsn.File         // file. nullable
 	Field17 []int64
 	Field18 []uint64
-	Field19 [][]*uint64 // just for check array encoding [nil,nil,[1,2,3],nil,[nil,nil,1]]
+	Field19 [][]*uint32 // just for check array encoding [nil,nil,[1,2,3],nil,[nil,nil,1]]
 }
 
 func TestLLSN_1M_random_signed_NUMBER(t *testing.T) {
@@ -367,10 +367,11 @@ func init() {
 	f.WriteString("This is demo file. This is demo file. This is demo file. This is demo file.")
 	f.Close()
 
+	var field_19_uint32value uint32 = 888
 	var field_19_uint64value uint64 = 888
-	var field19 = [][]*uint64{nil,
-		[]*uint64{&field_19_uint64value, &field_19_uint64value, &field_19_uint64value}, nil,
-		[]*uint64{nil, nil, nil, &field_19_uint64value}, nil}
+	var field19 = [][]*uint32{nil,
+		[]*uint32{&field_19_uint32value, &field_19_uint32value, &field_19_uint32value}, nil,
+		[]*uint32{nil, nil, nil, &field_19_uint32value}, nil}
 
 	exampleMainValue = ExampleMain{33, nil, &field_19_uint64value, // Field1, Field2, Field3
 		[...]bool{true, false, true}, // Field4
