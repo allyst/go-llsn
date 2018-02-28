@@ -48,7 +48,6 @@ func decode_ext(buffer *decodeBuffer, value *reflect.Value) {
 		panic("Unsupported version")
 	}
 
-	head[0] &= 0xf
 	threshold = (uint16(head[0]&0xf) << 8) | uint16(head[1])
 
 	stack.n = decodeUNumber(buffer)
