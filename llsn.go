@@ -126,10 +126,6 @@ func Decode(source interface{}, destination interface{}) (err error) {
 		if r := recover(); r != nil {
 			err = errors.New(fmt.Sprintf("Malformed data. (%s)", r))
 		}
-
-		if buffer.channel != nil {
-			close(buffer.channel)
-		}
 	}()
 
 	if value.Kind() != reflect.Ptr || value.Elem().Kind() != reflect.Struct {
