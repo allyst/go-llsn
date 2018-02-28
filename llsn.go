@@ -84,8 +84,8 @@ func Encode(v interface{}, a ...interface{}) *bytes.Buffer {
 		panic("wrong arguments")
 	}
 
-	if value.Kind() != reflect.Ptr && value.Elem().Kind() != reflect.Struct {
-		panic("expect '*struct' type, but yours '" + value.Type().String() + "'")
+	if value.Kind() != reflect.Ptr || value.Elem().Kind() != reflect.Struct {
+		panic("Incorrect type of the source (expect '*struct')")
 	}
 	value = value.Elem()
 
@@ -132,7 +132,7 @@ func Decode(source interface{}, destination interface{}) (err error) {
 		}
 	}()
 
-	if value.Kind() != reflect.Ptr && value.Elem().Kind() != reflect.Struct {
+	if value.Kind() != reflect.Ptr || value.Elem().Kind() != reflect.Struct {
 		return errors.New("Incorrect type of the destination (expect '*struct')")
 	}
 
