@@ -150,6 +150,12 @@ func decode_ext(buffer *decodeBuffer, value *reflect.Value) {
 				nullflags = buffer.read(1)
 			}
 
+			if field.Kind() == reflect.Ptr {
+				parray := reflect.New(field.Type().Elem())
+				field.Set(parray)
+				field = parray.Elem()
+			}
+
 			if field.Kind() == reflect.Slice {
 				field.Set(reflect.MakeSlice(field.Type(), int(n), int(n)))
 			}
