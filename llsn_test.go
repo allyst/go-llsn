@@ -308,7 +308,7 @@ func TestLLSN_decodeComplexStruct_via_channel(t *testing.T) {
 		fmt.Printf("TestLLSN_decodeComplexStruct_via_channel: %s\n", err)
 		return
 	}
-
+	close(chn)
 	fmt.Printf("TestLLSN_decodeComplexStruct_via_channel: PASSED\n")
 }
 
@@ -330,6 +330,7 @@ func BenchmarkLLSN_decodeComplexStruct_via_channel(b *testing.B) {
 		for k := 0; k < len(data); k++ {
 			chn <- data[k : k+1]
 		}
+		close(chn)
 	}
 
 }
