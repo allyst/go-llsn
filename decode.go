@@ -415,82 +415,83 @@ func DecodeNumber(buffer []byte) int64 {
 func decodeNumber(buffer *decodeBuffer) int64 {
 	var l uint8
 	var val, mask uint64
+	var b byte
 
-	b := buffer.read(1)
+	b = buffer.read(1)[0]
 
 	switch {
-	case (b[0] >> 7) == 0: // 0... ....
+	case (b >> 7) == 0: // 0... ....
 		l = 1
 
-		if b[0]&0x40 > 0 { // 0100 0000
-			b[0] |= 0x80
+		if b&0x40 > 0 { // 0100 0000
+			b |= 0x80
 			mask = 0xFFFFFFFFFFFFFF00 //7
 
 		} else {
-			b[0] &= 0x3f
+			b &= 0x3f
 		}
 
-		return int64(uint64(b[0]) | mask)
+		return int64(uint64(b) | mask)
 
-	case (b[0] >> 6) == 0x2: // 10.. ....
+	case (b >> 6) == 0x2: // 10.. ....
 		l = 2
-		if b[0]&0x20 > 0 { // 0010 0000
-			b[0] |= 0x40
+		if b&0x20 > 0 { // 0010 0000
+			b |= 0x40
 			mask = 0xFFFFFFFFFFFF8000 //14
 
 		} else {
-			b[0] &= 0x1f
+			b &= 0x1f
 		}
 
-	case (b[0] >> 5) == 0x6: // 110. ....
+	case (b >> 5) == 0x6: // 110. ....
 		l = 3
-		if b[0]&0x10 > 0 { // 0001 0000
-			b[0] |= 0x20
+		if b&0x10 > 0 { // 0001 0000
+			b |= 0x20
 			mask = 0xFFFFFFFFFFC00000 //21
 
 		} else {
-			b[0] &= 0xf
+			b &= 0xf
 		}
 
-	case (b[0] >> 4) == 0xe: // 1110 ....
+	case (b >> 4) == 0xe: // 1110 ....
 		l = 4
-		if b[0]&0x8 > 0 { // 0000 1000
-			b[0] |= 0x10
+		if b&0x8 > 0 { // 0000 1000
+			b |= 0x10
 			mask = 0xFFFFFFFFE0000000 //28
 
 		} else {
-			b[0] &= 0x7
+			b &= 0x7
 		}
 
-	case (b[0] >> 3) == 0x1e: // 1111 0...
+	case (b >> 3) == 0x1e: // 1111 0...
 		l = 5
-		if b[0]&0x4 > 0 { // 0000 0100
-			b[0] |= 0x8
+		if b&0x4 > 0 { // 0000 0100
+			b |= 0x8
 			mask = 0xFFFFFFF000000000 //35
 
 		} else {
-			b[0] &= 0x3
+			b &= 0x3
 		}
 
-	case (b[0] >> 2) == 0x3e: // 1111 10..
+	case (b >> 2) == 0x3e: // 1111 10..
 		l = 6
-		if b[0]&0x2 > 0 { // 0000 0010
+		if b&0x2 > 0 { // 0000 0010
 			mask = 0xFFFFF80000000000 //42
-			b[0] |= 0x4
+			b |= 0x4
 		} else {
-			b[0] &= 0x1
+			b &= 0x1
 		}
 
-	case (b[0] >> 1) == 0x7e: // 1111 110.
+	case (b >> 1) == 0x7e: // 1111 110.
 		l = 7
-		if b[0]&0x1 > 0 { // 0000 0001
+		if b&0x1 > 0 { // 0000 0001
 			mask = 0xFFFC000000000000 //49
-			b[0] |= 0x2
+			b |= 0x2
 		} else {
-			b[0] &= 0
+			b &= 0
 		}
 
-	case b[0] == 0xfe: // 1111 1110
+	case b == 0xfe: // 1111 1110
 		l = 8
 
 		bb := buffer.look(1)
@@ -499,14 +500,14 @@ func decodeNumber(buffer *decodeBuffer) int64 {
 		}
 		// b[0] &= 0xff
 
-	case b[0] == 0xff: // 1111 1111
+	case b == 0xff: // 1111 1111
 		l = 9
 	}
 
 	bb := buffer.read(uint64(l - 1))
 
 	if l < 8 {
-		val = unpack_number(append(b, bb...), l)
+		val = unpack_number(append([]byte{b}, bb...), l)
 	} else {
 		val = unpack_number(bb, l-1)
 	}
@@ -525,41 +526,42 @@ func DecodeUNumber(buffer []byte) uint64 {
 func decodeUNumber(buffer *decodeBuffer) uint64 {
 	var l uint8
 	var value uint64
+	var b byte
 
-	b := buffer.read(1)
+	b = buffer.read(1)[0]
 
 	switch {
-	case (b[0] >> 7) == 0: // 0... ....
-		return uint64(b[0])
+	case (b >> 7) == 0: // 0... ....
+		return uint64(b)
 
-	case (b[0] >> 6) == 0x2: // 10.. ....
+	case (b >> 6) == 0x2: // 10.. ....
 		l = 2
-		b[0] &= 0x3f
-	case (b[0] >> 5) == 0x6: // 110. ....
+		b &= 0x3f
+	case (b >> 5) == 0x6: // 110. ....
 		l = 3
-		b[0] &= 0x1f
-	case (b[0] >> 4) == 0xe: // 1110 ....
+		b &= 0x1f
+	case (b >> 4) == 0xe: // 1110 ....
 		l = 4
-		b[0] &= 0xf
-	case (b[0] >> 3) == 0x1e: // 1111 0...
+		b &= 0xf
+	case (b >> 3) == 0x1e: // 1111 0...
 		l = 5
-		b[0] &= 0x7
-	case (b[0] >> 2) == 0x3e: // 1111 10..
+		b &= 0x7
+	case (b >> 2) == 0x3e: // 1111 10..
 		l = 6
-		b[0] &= 0x3
-	case (b[0] >> 1) == 0x7e: // 1111 110.
+		b &= 0x3
+	case (b >> 1) == 0x7e: // 1111 110.
 		l = 7
-		b[0] &= 0x1
-	case b[0] == 0xfe: // 1111 1110
+		b &= 0x1
+	case b == 0xfe: // 1111 1110
 		l = 8
-	case b[0] == 0xff: // 1111 1111
+	case b == 0xff: // 1111 1111
 		l = 9
 	}
 
 	bb := buffer.read(uint64(l - 1))
 
 	if l < 8 {
-		value = unpack_number(append(b, bb...), l)
+		value = unpack_number(append([]byte{b}, bb...), l)
 	} else {
 		value = unpack_number(bb, l-1)
 	}

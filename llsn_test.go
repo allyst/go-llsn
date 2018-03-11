@@ -200,6 +200,25 @@ func TestLLSN_encodeComplexStruct(t *testing.T) {
 
 }
 
+func TestLLSN_decodeDoNotModifySrc(t *testing.T) {
+	var E1 ExampleMain
+
+	var data []byte = make([]byte, len(exampleMainValueEncoded))
+	copy(data, exampleMainValueEncoded)
+
+	if err := llsn.Decode(data, &E1); err != nil {
+		fmt.Printf("TestLLSN_decodeComplexStruct: %s\n", err)
+		return
+	}
+
+	if bytes.Compare(data, exampleMainValueEncoded) != 0 {
+		t.Fatalf("Source buffer has been modifyed")
+	}
+
+	fmt.Printf("TestLLSN_decodeDoNotModifySrc: PASSED\n")
+
+}
+
 func BenchmarkLLSN_encodeComplexStruct(b *testing.B) {
 	llsn.SetOption("threshold", 4)
 	for i := 0; i < b.N; i++ {
