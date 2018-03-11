@@ -54,8 +54,7 @@ func Encode(v interface{}, a ...interface{}) *bytes.Buffer {
 	var args []interface{} = a
 	var channel chan []byte
 	var buffer *bytes.Buffer
-	var mutex = &sync.Mutex{}
-	var done = sync.NewCond(mutex)
+	var wg sync.WaitGroup
 
 	switch len(args) {
 	case 0:
@@ -91,9 +90,9 @@ func Encode(v interface{}, a ...interface{}) *bytes.Buffer {
 
 	// create internal channel handler
 	if buffer != nil {
+		wg.Add(1)
 		go func() {
-
-			mutex.Lock()
+			defer wg.Done()
 			for {
 				b, ok := <-channel
 				if ok {
@@ -102,7 +101,6 @@ func Encode(v interface{}, a ...interface{}) *bytes.Buffer {
 					break
 				}
 			}
-			done.Signal()
 		}()
 
 	}
@@ -112,7 +110,7 @@ func Encode(v interface{}, a ...interface{}) *bytes.Buffer {
 
 	// we should wait channel's routines in case of using internal handler
 	if buffer != nil {
-		done.Wait()
+		wg.Wait()
 	}
 
 	return buffer
