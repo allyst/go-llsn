@@ -276,10 +276,7 @@ func BenchmarkLLSN_encodeComplexStruct_via_channel(b *testing.B) {
 func TestLLSN_decodeComplexStruct(t *testing.T) {
 	var E1 ExampleMain
 
-	var data []byte = make([]byte, len(exampleMainValueEncoded))
-	copy(data, exampleMainValueEncoded)
-
-	if err := llsn.Decode(data, &E1); err != nil {
+	if err := llsn.Decode(exampleMainValueEncoded, &E1); err != nil {
 		fmt.Printf("TestLLSN_decodeComplexStruct: %s\n", err)
 		return
 	}
@@ -298,10 +295,7 @@ func BenchmarkLLSN_decodeComplexStruct(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		var E1 ExampleMain
 
-		var data []byte = make([]byte, len(exampleMainValueEncoded))
-		copy(data, exampleMainValueEncoded)
-
-		llsn.Decode(data, &E1)
+		llsn.Decode(exampleMainValueEncoded, &E1)
 	}
 }
 
@@ -309,7 +303,6 @@ func TestLLSN_decodeComplexStruct_via_channel(t *testing.T) {
 	var E1 ExampleMain
 	var chn chan []byte
 
-	var data []byte = make([]byte, len(exampleMainValueEncoded))
 	chn = make(chan []byte)
 
 	go func() {
@@ -317,10 +310,9 @@ func TestLLSN_decodeComplexStruct_via_channel(t *testing.T) {
 			fmt.Printf("Decoding error: %s\n", err)
 		}
 	}()
-	copy(data, exampleMainValueEncoded)
 
-	for k := 0; k < len(data); k++ {
-		chn <- data[k : k+1]
+	for k := 0; k < len(exampleMainValueEncoded); k++ {
+		chn <- exampleMainValueEncoded[k : k+1]
 	}
 
 	if err := compareComplexStruct(&E1, &exampleMainValue); err != nil {
@@ -331,12 +323,11 @@ func TestLLSN_decodeComplexStruct_via_channel(t *testing.T) {
 	fmt.Printf("TestLLSN_decodeComplexStruct_via_channel: PASSED\n")
 }
 
-func BenchmarkLLSN_decodeComplexStruct_via_channel(b *testing.B) {
+func BenchmarkLLSN_decodeComplexStruct_via_channel_1byte(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		var E1 ExampleMain
 		var chn chan []byte
 
-		var data []byte = make([]byte, len(exampleMainValueEncoded))
 		chn = make(chan []byte)
 
 		go func() {
@@ -344,10 +335,9 @@ func BenchmarkLLSN_decodeComplexStruct_via_channel(b *testing.B) {
 				fmt.Printf("Decoding error: %s\n", err)
 			}
 		}()
-		copy(data, exampleMainValueEncoded)
 
-		for k := 0; k < len(data); k++ {
-			chn <- data[k : k+1]
+		for k := 0; k < len(exampleMainValueEncoded); k++ {
+			chn <- exampleMainValueEncoded[k : k+1]
 		}
 		close(chn)
 	}
